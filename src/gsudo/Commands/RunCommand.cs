@@ -41,6 +41,9 @@ namespace gsudo.Commands
 
             var exeName = CommandToRun.FirstOrDefault();
 
+            if (Settings.ForceNewWindow)
+                InputArguments.NewWindow = true;
+
             var elevationRequest = new ElevationRequest()
             {
                 FileName = exeName,

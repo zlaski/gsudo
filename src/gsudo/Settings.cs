@@ -51,6 +51,9 @@ namespace gsudo
             new RegistrySetting<bool>(nameof(SecurityEnforceUacIsolation), false, bool.Parse,
                 RegistrySettingScope.GlobalOnly);
 
+        public static RegistrySetting<bool> ForceNewWindow { get; internal set; }
+            = new RegistrySetting<bool>(nameof(ForceNewWindow), false, bool.Parse, RegistrySettingScope.GlobalOnly);
+
         public static IDictionary<string, RegistrySetting> AllKeys =>
             new Dictionary<string, RegistrySetting>(StringComparer.OrdinalIgnoreCase)
                 .Add(
@@ -59,12 +62,14 @@ namespace gsudo
                     LogLevel,
                     Prompt,
                     PipedPrompt,
+                    ForceNewWindow,
                     ForceAttachedConsole,
                     ForcePipedConsole,
                     ForceVTConsole,
                     CopyEnvironmentVariables,
                     CopyNetworkShares,
-                    SecurityEnforceUacIsolation);
+                    SecurityEnforceUacIsolation
+                );
 
         internal static TimeSpan TimeSpanParseWithInfinite(string value)
         {
