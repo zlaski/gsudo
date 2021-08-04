@@ -19,6 +19,14 @@ namespace gsudo.Helpers
             string currentShellExeName;
             Shell currentShell = ShellHelper.DetectInvokingShell(out currentShellExeName);
 
+            bool forceStayOpened;
+            if (Settings.ForceNewWindow
+                    && !Console.IsOutputRedirected
+                )
+                forceStayOpened = true;
+            else
+                forceStayOpened = false;
+
             if (!InputArguments.Direct)
             {
                 if (currentShell == Shell.PowerShellCore623BuggedGlobalInstall)
@@ -59,6 +67,9 @@ namespace gsudo.Helpers
                     if (args.Length > 0)
                     {
                         newArgs.Add("-NoProfile");
+                        if (forceStayOpened)
+                            newArgs.Add("-NoExit");
+
                         newArgs.Add("-Command");
 
                         string pscommand = string.Join(" ", args);
@@ -83,7 +94,7 @@ namespace gsudo.Helpers
                     if (args.Length == 0)
                         return new[] { currentShellExeName };
                     else
-                        return new[] { currentShellExeName, "-c" }
+                        return new[] { currentShellExeName, forceStayOpened ? "-k" : "-c" }
                             .Concat(args).ToArray();
                 }
                 else if (currentShell == Shell.Wsl)
@@ -115,8 +126,9 @@ namespace gsudo.Helpers
                 // Fall back to CMD.
                 currentShellExeName = Environment.GetEnvironmentVariable("COMSPEC");
             }
-                
+
             // Not Powershell, or Powershell Core, assume CMD.
+
             if (args.Length == 0)
             {
                 return new string[]
@@ -124,9 +136,10 @@ namespace gsudo.Helpers
             }
             else
             {
+
                 if (CmdCommands.Contains(args[0])) 
                     return new string[]
-                        { currentShellExeName, "/c" }
+                        { currentShellExeName, forceStayOpened ? "/k" : "/c" }
                         .Concat(args).ToArray();
 
                 var exename = ProcessFactory.FindExecutableInPath(UnQuote(args[0]));
