@@ -30,7 +30,7 @@ namespace gsudo.ProcessRenderers
 
             _connection = connection;
             _elevationRequest = elevationRequest;
-            Environment.SetEnvironmentVariable("prompt", Environment.ExpandEnvironmentVariables(elevationRequest.Prompt));
+            Environment.SetEnvironmentVariable("PROMPT", Environment.ExpandEnvironmentVariables(elevationRequest.Prompt));
 
             ProcessApi.CreateProcessFlags dwCreationFlags = ProcessApi.CreateProcessFlags.CREATE_SUSPENDED;
 

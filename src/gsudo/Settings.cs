@@ -9,17 +9,17 @@ namespace gsudo
 {
     class Settings
     {
-        public const string DefaultAnsiPrompt = "$p$e[1;31m# $e[0m";
-        public const string DefaultAsciiPrompt = "$P# ";
+        public const string DefaultAnsiPrompt = "$P$G "; // $p$e[1;31m# $e[0m";
+        public const string DefaultAsciiPrompt = "$P$G "; // "$P# ";
 
         public const int BufferSize = 10240;
         public static readonly Encoding Encoding = new System.Text.UTF8Encoding(false);
         public static RegistrySetting<CacheMode> CacheMode { get; set; }
-            = new RegistrySetting<CacheMode>(nameof(CacheMode), Enums.CacheMode.Explicit,
+            = new RegistrySetting<CacheMode>(nameof(CacheMode), Enums.CacheMode.Auto,
                 (s) => (CacheMode) Enum.Parse(typeof(CacheMode), s, true), RegistrySettingScope.GlobalOnly);
 
         public static RegistrySetting<TimeSpan> CacheDuration { get; set; }
-            = new RegistrySetting<TimeSpan>(nameof(CacheDuration), TimeSpan.FromSeconds(300), TimeSpanParseWithInfinite,
+            = new RegistrySetting<TimeSpan>(nameof(CacheDuration), TimeSpan.MaxValue, TimeSpanParseWithInfinite,
                 RegistrySettingScope.GlobalOnly, TimeSpanWithInfiniteToString);
 
         public static RegistrySetting<string> PipedPrompt { get; set; }
