@@ -9,8 +9,8 @@ namespace gsudo
 {
     class Settings
     {
-        public const string DefaultAnsiPrompt = "$P$G "; // $p$e[1;31m# $e[0m";
-        public const string DefaultAsciiPrompt = "$P$G "; // "$P# ";
+        public const string DefaultAnsiPrompt = "$P$G"; // $p$e[1;31m# $e[0m";
+        public const string DefaultAsciiPrompt = "$P$G"; // "$P# ";
 
         public const int BufferSize = 10240;
         public static readonly Encoding Encoding = new System.Text.UTF8Encoding(false);
