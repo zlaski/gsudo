@@ -2,7 +2,7 @@ image: Visual Studio 2019
 
 install:
   - choco install gitversion.portable -pre -y
-
+  - ps: Install-Module Pester -Force -SkipPublisherCheck -Scope CurrentUser
 init:
   - git config --global core.autocrlf true
   - powershell -noprofile -command "Install-Module PSReadLine -Force -SkipPublisherCheck -AllowPrerelease"
@@ -12,10 +12,18 @@ before_build:
   - ps: gitversion /l console /output buildserver /updateAssemblyInfo
 
 after_build:
-  - 7z a gsudo.%CONFIGURATION%.%APPVEYOR_BUILD_VERSION%.Unsigned.zip %APPVEYOR_BUILD_FOLDER%\src\gsudo\bin\*.*
+  - 7z a gsudo.%CONFIGURATION%.%APPVEYOR_BUILD_VERSION%.Unsigned.zip %APPVEYOR_BUILD_FOLDER%\src\gsudo\bin\*.* %APPVEYOR_BUILD_FOLDER%\src\gsudo.extras\gsudoModule.* %APPVEYOR_BUILD_FOLDER%\src\gsudo.extras\Invoke-gsudo.ps1
   - appveyor PushArtifact gsudo.%CONFIGURATION%.%APPVEYOR_BUILD_VERSION%.Unsigned.zip
-#  - vstest.console /logger:Appveyor C:\git\gsudo\src\gsudo.Tests\bin\%CONFIGURATION%\gsudo.Tests.dll
   
+test_script:
+  - ps: $Env:Path+=";$($Env:APPVEYOR_BUILD_FOLDER)/src/gsudo/bin;";
+  - vstest.console /logger:Appveyor %APPVEYOR_BUILD_FOLDER%\src\gsudo.Tests\bin\%CONFIGURATION%\gsudo.Tests.dll  
+  - powershell -c Invoke-Pester -EnableExit -OutputFile Powershell5Tests.xml -OutputFormat NUnitXml
+  - pwsh -c Invoke-Pester -EnableExit -OutputFile PowershellCoreTests.xml -OutputFormat NUnitXml
+  - ps: |
+        (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path "Powershell5Tests.xml"))
+        (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path "PowershellCoreTests.xml"))
+
 on_finish:
   - ps: if($env:APPVEYOR_RDP_ENABLED -eq 'TRUE') { $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1')) }
 
@@ -27,7 +35,7 @@ build:
   parallel: true
   project: src\gsudo.sln
   verbosity: minimal
-    
+      
 cache:
   - src\packages -> **\packages.config  # preserve "packages" directory in the root of build folder but will reset it if packages.config is modified
   - '%LocalAppData%\NuGet\Cache'    # NuGet < v3
